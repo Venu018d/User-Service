@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,9 @@ import com.zmater.userservice.repository.VehicleRepository;
 public class UserController {
 	
 	
+	@Autowired
+	ModelMapper modelMapper;
+	
 	
 	@Autowired
 	private UserRepository repository;
@@ -43,8 +47,7 @@ public class UserController {
 	
 	@PostMapping("/signup")
 	public ResponseEntity<User> signup( @Valid @RequestBody  PhoneNumberDTO phoneNumberDTO)
-	{
-		
+	{	
 		User user=new User();
 		user.setPhoneNumber(phoneNumberDTO.getPhoneNumber());
 		 User savedUser=repository.save(user);
@@ -52,8 +55,7 @@ public class UserController {
 		//URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
 		return ResponseEntity.created(location).build();
 	}
-	
-	
+
 	@PostMapping("/login")
 	public User login(@Valid @RequestBody PhoneNumberDTO phoneNumberDTO) throws UserNotFoundException
 	{
@@ -98,19 +100,10 @@ public class UserController {
     	User user=repository.findById(userId).orElse(null);
     	if(user==null)
     		throw new UserNotFoundException("User Doesn't Exist, Sign Up First!");
-        Vehicle vehicle=new Vehicle();
-        vehicle.setMake(vehicleDTO.getMake());
-        vehicle.setModel(vehicleDTO.getModel());
-        vehicle.setFuelType(vehicleDTO.getFuelType());
-        vehicle.setExpiryDate(vehicleDTO.getExpiryDate());
-        vehicle.setPolicyNumber(vehicleDTO.getPolicyNumber());
-        vehicle.setYearOfRegistration(vehicleDTO.getYearOfRegistration());
-        vehicle.setRegistrationNumber(vehicleDTO.getRegistrationNumber());
-        vehicle.setInsuranceProvider(vehicleDTO.getInsuranceProvider());
-        vehicle.setTransmissionType(vehicleDTO.getTransmissionType());
+    	
+    	Vehicle vehicle=modelMapper.map(vehicleDTO, Vehicle.class);
+    	
         vehicle.setUser(user);
-      
-     
          user.getVehicle().add(vehicle);
          repository.save(user);
                
@@ -130,15 +123,7 @@ public class UserController {
     	if(savedVehicle.getUser().getId()!=userId)
     	    throw new UnauthorizedException("User is unauthorized to update vehicle");
         
-    	
-    	
-    	savedVehicle.setMake(vehicleDTO.getMake());
-    	savedVehicle.setModel(vehicleDTO.getModel());
-    	savedVehicle.setFuelType(vehicleDTO.getModel());
-    	savedVehicle.setPolicyNumber(vehicleDTO.getPolicyNumber());
-    	savedVehicle.setRegistrationNumber(vehicleDTO.getRegistrationNumber());
-    	savedVehicle.setPolicyNumber(vehicleDTO.getPolicyNumber());
-    	savedVehicle.setTransmissionType(vehicleDTO.getTransmissionType());
+    	modelMapper.map(vehicleDTO, savedVehicle);
     	
     	vehicleRepository.save(savedVehicle);
     	   		
