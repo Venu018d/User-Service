@@ -44,13 +44,12 @@ public class UserController {
 	@PostMapping("/signup")
 	public ResponseEntity<User> signup( @Valid @RequestBody  PhoneNumberDTO phoneNumberDTO)
 	{
-		System.out.println(phoneNumberDTO);
 		
 		User user=new User();
 		user.setPhoneNumber(phoneNumberDTO.getPhoneNumber());
 		 User savedUser=repository.save(user);
-		
-		URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
+		 URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/signup").replacePath("/users/{id}/profile").buildAndExpand(savedUser.getId()).toUri();	
+		//URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
 		return ResponseEntity.created(location).build();
 	}
 	
@@ -126,7 +125,7 @@ public class UserController {
     	
     	Vehicle savedVehicle=vehicleRepository.findById(vehicleId).orElse(null);
     	if(savedVehicle==null)
-    		throw new VehicleNotFoundException("Vehicle doesn;t exist");
+    		throw new VehicleNotFoundException("Vehicle doesn't exist");
     	
     	if(savedVehicle.getUser().getId()!=userId)
     	    throw new UnauthorizedException("User is unauthorized to update vehicle");
