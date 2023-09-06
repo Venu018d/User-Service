@@ -25,6 +25,7 @@ import com.zmater.userservice.dto.VehicleDTO;
 import com.zmater.userservice.entity.User;
 import com.zmater.userservice.entity.Vehicle;
 import com.zmater.userservice.exception.UnauthorizedException;
+import com.zmater.userservice.exception.UserAlreadyExistsException;
 import com.zmater.userservice.exception.UserNotFoundException;
 import com.zmater.userservice.exception.VehicleNotFoundException;
 import com.zmater.userservice.repository.UserRepository;
@@ -46,14 +47,21 @@ public class UserController {
 	private VehicleRepository vehicleRepository;
 	
 	@PostMapping("/signup")
-	public ResponseEntity<User> signup( @Valid @RequestBody  PhoneNumberDTO phoneNumberDTO)
+	public ResponseEntity<User> signup( @Valid @RequestBody  PhoneNumberDTO phoneNumberDTO) throws UserAlreadyExistsException
 	{	
+		 User isUserExists=	repository.findByPhoneNumber(phoneNumberDTO.getPhoneNumber());
+		 URI location;
+	  if(isUserExists!=null)
+	  throw new UserAlreadyExistsException("User Already Exists");
+	  else
+	  {
 		User user=new User();
 		user.setPhoneNumber(phoneNumberDTO.getPhoneNumber());
 		 User savedUser=repository.save(user);
-		 URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/signup").replacePath("/users/{id}/profile").buildAndExpand(savedUser.getId()).toUri();	
+		 location=ServletUriComponentsBuilder.fromCurrentRequest().path("/signup").replacePath("/users/{id}/profile").buildAndExpand(savedUser.getId()).toUri();	
 		//URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
-		return ResponseEntity.created(location).build();
+	  }
+		 return ResponseEntity.created(location).build();
 	}
 
 	@PostMapping("/login")
