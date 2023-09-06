@@ -58,6 +58,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);  
      }     
    
+
+	 @ExceptionHandler(UserAlreadyExistsException.class)
+     public final ResponseEntity<ExceptionResponse> handleUserAlreadyExists(UserAlreadyExistsException ex, WebRequest request) {	 
+     ExceptionResponse error = new ExceptionResponse(new Date(), ex.toString(), ex.getStackTrace().toString());
+     return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+	 }
+		 
+	 
 	 
      @ExceptionHandler(Exception.class)
      public final ResponseEntity<ExceptionResponse> handleAllExceptions(Exception ex, WebRequest request) {	 
